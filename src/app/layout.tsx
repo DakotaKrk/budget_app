@@ -5,8 +5,8 @@ import './globals.css'
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 
 export const metadata: Metadata = {
-  title: 'Budget',
-  description: 'Din personliga budgetapp',
+  title: 'Mony',
+  description: 'Få koll på vart pengarna tar vägen',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

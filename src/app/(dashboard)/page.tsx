@@ -101,6 +101,17 @@ export default async function OverviewPage({ searchParams }: Props) {
   const all = (txData ?? []) as SupabaseTransaction[]
   const summary = buildSummary(all, month)
 
+  // Previous month values for trend arrows
+  const prev = summary.lastSixMonths[summary.lastSixMonths.length - 2] ?? { income: 0, expenses: 0 }
+  function trend(current: number, previous: number) {
+    if (previous === 0) return null
+    const pct = Math.round(((current - previous) / previous) * 100)
+    if (Math.abs(pct) < 1) return null
+    return { pct, up: current > previous }
+  }
+  const incomeTrend  = trend(summary.income, prev.income)
+  const expenseTrend = trend(summary.expenses, prev.expenses)
+
   // Recent transactions for the current month (latest 8)
   const recent = all
     .filter(t => t.transaction_date.startsWith(month))
@@ -146,11 +157,31 @@ export default async function OverviewPage({ searchParams }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div style={card}>
             <p style={{ fontSize: 11, color: '#64748b', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Inkomster</p>
-            <p style={{ fontSize: 28, fontWeight: 700, color: '#10b981', letterSpacing: '-0.5px' }}>+{formatAmount(summary.income)}</p>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+              <p style={{ fontSize: 28, fontWeight: 700, color: '#10b981', letterSpacing: '-0.5px' }}>+{formatAmount(summary.income)}</p>
+              {incomeTrend && (
+                <span style={{ fontSize: 12, fontWeight: 600, color: incomeTrend.up ? '#10b981' : '#ef4444', marginBottom: 5 }}>
+                  {incomeTrend.up ? '↑' : '↓'} {Math.abs(incomeTrend.pct)}%
+                </span>
+              )}
+            </div>
+            {incomeTrend && (
+              <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>vs förra månaden</p>
+            )}
           </div>
           <div style={card}>
             <p style={{ fontSize: 11, color: '#64748b', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Utgifter</p>
-            <p style={{ fontSize: 28, fontWeight: 700, color: '#6366f1', letterSpacing: '-0.5px' }}>−{formatAmount(summary.expenses)}</p>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+              <p style={{ fontSize: 28, fontWeight: 700, color: '#6366f1', letterSpacing: '-0.5px' }}>−{formatAmount(summary.expenses)}</p>
+              {expenseTrend && (
+                <span style={{ fontSize: 12, fontWeight: 600, color: expenseTrend.up ? '#ef4444' : '#10b981', marginBottom: 5 }}>
+                  {expenseTrend.up ? '↑' : '↓'} {Math.abs(expenseTrend.pct)}%
+                </span>
+              )}
+            </div>
+            {expenseTrend && (
+              <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>vs förra månaden</p>
+            )}
           </div>
           <div style={card}>
             <p style={{ fontSize: 11, color: '#64748b', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Resultat</p>

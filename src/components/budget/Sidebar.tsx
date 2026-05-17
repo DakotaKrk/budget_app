@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart2, TrendingDown, TrendingUp, RefreshCw, Tag, User, LogOut, X, ShoppingBag } from 'lucide-react'
+import { BarChart2, TrendingDown, TrendingUp, RefreshCw, Tag, LogOut, X, ShoppingBag, Smartphone } from 'lucide-react'
 import { signOut } from '@/app/actions/auth'
 import AddTransactionModal from '@/components/budget/AddTransactionModal'
 
@@ -12,12 +12,8 @@ const mainNav = [
   { href: '/intakter', label: 'Intäkter', icon: TrendingUp },
   { href: '/aterkommande', label: 'Återkommande', icon: RefreshCw },
   { href: '/vinted', label: 'Vinted & Tradera', icon: ShoppingBag },
+  { href: '/prenumerationer', label: 'Prenumerationer', icon: Smartphone },
   { href: '/kategorier', label: 'Kategorier', icon: Tag },
-]
-
-const personNav = [
-  { href: '/nenlil', label: 'Nenlil', color: '#a78bfa' },
-  { href: '/nathalie', label: 'Nathalie', color: '#34d399' },
 ]
 
 interface SidebarProps {
@@ -65,8 +61,8 @@ export default function Sidebar({ userEmail, householdName, inviteCode, onClose 
       <div className="px-5 pt-8 pb-4">
         <div className="flex items-center gap-2">
           <span className="text-xl">💜</span>
-          <span style={{ color: '#e0e7ff', fontWeight: 700, fontSize: 18, letterSpacing: '-0.3px' }}>
-            Budget
+          <span style={{ color: '#e0e7ff', fontWeight: 800, fontSize: 18, letterSpacing: '-0.3px' }}>
+            Mony
           </span>
         </div>
       </div>
@@ -83,36 +79,6 @@ export default function Sidebar({ userEmail, householdName, inviteCode, onClose 
           return (
             <Link key={href} href={href} style={linkStyle(isActive)} onClick={() => onClose?.()}>
               <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
-              {label}
-            </Link>
-          )
-        })}
-
-        {/* Personal sections */}
-        <div style={{ marginTop: 20, marginBottom: 6, padding: '0 4px' }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-            Personligt
-          </p>
-        </div>
-        {personNav.map(({ href, label, color }) => {
-          const isActive = pathname === href
-          return (
-            <Link key={href} href={href} style={linkStyle(isActive)} onClick={() => onClose?.()}>
-              <span
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  backgroundColor: color + '33',
-                  border: `2px solid ${color}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <User size={10} strokeWidth={2.5} style={{ color }} />
-              </span>
               {label}
             </Link>
           )

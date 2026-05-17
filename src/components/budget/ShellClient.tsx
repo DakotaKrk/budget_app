@@ -53,8 +53,8 @@ export default function ShellClient({ userEmail, householdName, inviteCode, chil
           >
             <Menu size={20} />
           </button>
-          <span style={{ color: '#1e1b4b', fontWeight: 700, fontSize: 16, letterSpacing: '-0.2px' }}>
-            💜 Budget
+          <span style={{ color: '#1e1b4b', fontWeight: 800, fontSize: 16, letterSpacing: '-0.2px' }}>
+            💜 Mony
           </span>
         </div>
 

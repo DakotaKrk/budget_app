@@ -1,14 +1,13 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const AUTH_PAGES = ['/login', '/signup']
+const AUTH_PAGES = ['/login', '/signup', '/welcome']
 // /auth/callback must be public: the browser arrives here unauthenticated
 // carrying only a one-time PKCE code — the route exchanges it for a session.
 // /forgot-password and /reset-password are public so unauthenticated users
 // arriving from a reset email can reach them without being redirected to /login.
-// /onboarding is intentionally NOT public: only authenticated users reach it
-// (via the dashboard layout redirect after login / email confirmation).
-const PUBLIC_PAGES = ['/login', '/signup', '/auth/callback', '/forgot-password', '/reset-password']
+// /welcome is the landing page — public for everyone, logged-in users are redirected away.
+const PUBLIC_PAGES = ['/login', '/signup', '/auth/callback', '/forgot-password', '/reset-password', '/welcome']
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -61,8 +60,8 @@ export async function middleware(request: NextRequest) {
       console.warn(`[middleware] Unauthenticated API call to ${pathname} — returning 401`)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    console.warn(`[middleware] Unauthenticated page access to ${pathname} — redirecting to /login`)
-    return NextResponse.redirect(new URL('/login', request.url))
+    console.warn(`[middleware] Unauthenticated page access to ${pathname} — redirecting to /welcome`)
+    return NextResponse.redirect(new URL('/welcome', request.url))
   }
 
   return supabaseResponse

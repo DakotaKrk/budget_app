@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
         <span style={{ fontSize: 32 }}>💜</span>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0f172a', marginTop: 8, letterSpacing: '-0.5px' }}>
-          Budget
+          Mony
         </h1>
         <p style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>Välj nytt lösenord</p>
       </div>
