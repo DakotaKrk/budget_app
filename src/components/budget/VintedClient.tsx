@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Tag } from 'lucide-react'
 import { formatAmount } from '@/lib/utils'
 import AddTransactionModal from '@/components/budget/AddTransactionModal'
 import { EnrichedTransaction } from '@/types'
+import CategoryIcon from '@/components/budget/CategoryIcon'
 
 export default function VintedClient() {
   const [items, setItems]       = useState<EnrichedTransaction[]>([])
@@ -79,8 +80,8 @@ export default function VintedClient() {
 
       {/* List */}
       <div style={card}>
-        <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>
-          👗 Vinted & Tradera
+        <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Tag size={15} color="#10b981" /> Vinted & Tradera
         </p>
 
         {loading && (
@@ -89,7 +90,7 @@ export default function VintedClient() {
 
         {!loading && items.length === 0 && (
           <div style={{ textAlign: 'center', padding: '32px 0' }}>
-            <p style={{ fontSize: 28, marginBottom: 8 }}>👗</p>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><Tag size={28} color="#10b981" /></div>
             <p style={{ fontSize: 14, fontWeight: 500, color: '#0f172a', marginBottom: 4 }}>Inga försäljningar ännu</p>
             <p style={{ fontSize: 13, color: '#64748b' }}>
               Klicka på "Lägg till" och välj kategorin Vinted/Tradera för att logga en försäljning.
@@ -106,10 +107,10 @@ export default function VintedClient() {
                 style={{ borderBottom: i < items.length - 1 ? '1px solid #f1f5f9' : 'none' }}
               >
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0"
+                  className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: (tx.category?.color ?? '#10b981') + '22' }}
                 >
-                  {tx.category?.icon ?? '👗'}
+                  <CategoryIcon name={tx.category?.icon ?? 'Tag'} size={16} color={tx.category?.color ?? '#10b981'} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p style={{ fontSize: 14, fontWeight: 500, color: '#0f172a' }}>{tx.description}</p>

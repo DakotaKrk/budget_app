@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Trash2, ChevronDown, ChevronUp, Plus } from 'lucide-react'
+import { Trash2, ChevronDown, ChevronUp, Plus, Landmark, CheckCircle, Banknote } from 'lucide-react'
 import { formatAmount } from '@/lib/utils'
 
 interface LoanPayment {
@@ -294,7 +294,7 @@ export default function LoanClient() {
       {/* Empty state */}
       {!loading && loans.length === 0 && (
         <div style={{ ...card, textAlign: 'center', padding: '48px 24px' }}>
-          <p style={{ fontSize: 32, marginBottom: 10 }}>🏦</p>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}><Landmark size={32} color="#6366f1" /></div>
           <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a', marginBottom: 6 }}>Inga lån registrerade</p>
           <p style={{ fontSize: 13, color: '#64748b' }}>
             Klicka på "Lägg till lån" ovan för att börja spåra dina lån.
@@ -320,7 +320,7 @@ export default function LoanClient() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 18 }}>{isDone ? '✅' : '🏦'}</span>
+                    <span style={{ display: 'flex' }}>{isDone ? <CheckCircle size={18} color="#10b981" /> : <Landmark size={18} color="#6366f1" />}</span>
                     <p style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>{loan.name}</p>
                     {isDone && (
                       <span style={{ fontSize: 11, fontWeight: 600, backgroundColor: '#dcfce7', color: '#16a34a', padding: '2px 8px', borderRadius: 99 }}>
@@ -498,9 +498,9 @@ export default function LoanClient() {
                         >
                           <div
                             className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                            style={{ backgroundColor: '#dcfce7', fontSize: 14 }}
+                            style={{ backgroundColor: '#dcfce7' }}
                           >
-                            💸
+                            <Banknote size={14} color="#16a34a" />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{ fontSize: 13, fontWeight: 500, color: '#0f172a' }}>

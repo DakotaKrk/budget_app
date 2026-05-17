@@ -28,6 +28,7 @@ function enrich(tx: SupabaseTransaction): EnrichedTransaction {
     description: tx.title,
     date: tx.transaction_date,
     isRecurring: tx.is_recurring ?? false,
+    isShared: tx.is_shared ?? true,
     category: {
       name: meta.name,
       color: meta.color,
@@ -66,6 +67,11 @@ export async function GET(req: NextRequest) {
   if (recurring === 'true') query = query.eq('is_recurring', true)
   if (recurring === 'false') query = query.eq('is_recurring', false)
 
+  // Personal transactions are only visible to their creator.
+  // We fetch shared ones for all, plus personal ones belonging to this user.
+  // Supabase doesn't support OR filters easily in the builder, so we use raw filter.
+  query = query.or(`is_shared.eq.true,user_id.eq.${user.id}`)
+
   const { data, error } = await query
   if (error) {
     console.error('[GET /api/transactions]', error)
@@ -82,7 +88,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { amount, description, category, type, date, isRecurring } = body
+  const { amount, description, category, type, date, isRecurring, isShared } = body
 
   if (!amount || !description?.trim() || !type || !date) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -106,6 +112,7 @@ export async function POST(req: NextRequest) {
       category: categoryName,
       transaction_date: date,
       is_recurring: isRecurring === true,
+      is_shared: isShared !== false,
     })
     .select()
     .single()

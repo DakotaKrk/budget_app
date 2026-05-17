@@ -1,6 +1,7 @@
 'use client'
 
 import { CATEGORIES, CategoryMeta } from '@/lib/categories'
+import CategoryIcon from '@/components/budget/CategoryIcon'
 
 export default function CategoriesClient() {
   const expenses = CATEGORIES.filter(c => c.type === 'expense')
@@ -31,11 +32,10 @@ export default function CategoriesClient() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 15,
                 flexShrink: 0,
               }}
             >
-              {cat.icon}
+              <CategoryIcon name={cat.icon} size={15} color={cat.color} />
             </div>
             <span style={{ flex: 1, fontSize: 14, color: '#0f172a', fontWeight: 500 }}>
               {cat.name}

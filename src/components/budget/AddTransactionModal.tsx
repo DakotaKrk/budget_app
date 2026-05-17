@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { RefreshCw, Hash, TrendingDown, TrendingUp, Users, Lock } from 'lucide-react'
 import { CATEGORIES } from '@/lib/categories'
 import { todayISO } from '@/lib/utils'
 
@@ -26,6 +27,7 @@ export default function AddTransactionModal({ fullWidth = false, defaultRecurrin
   const [category, setCategory]     = useState('')
   const [date, setDate]             = useState(todayISO())
   const [isRecurring, setIsRecurring] = useState(defaultRecurring)
+  const [isShared, setIsShared]       = useState(true)
   const [saving, setSaving]         = useState(false)
   const [error, setError]           = useState<string | null>(null)
   const [success, setSuccess]       = useState(false)
@@ -42,6 +44,7 @@ export default function AddTransactionModal({ fullWidth = false, defaultRecurrin
     setCategory(defaultCats[0]?.name ?? '')
     setDate(todayISO())
     setIsRecurring(defaultRecurring)
+    setIsShared(true)
     setError(null)
     setSuccess(false)
     setOpen(true)
@@ -89,6 +92,7 @@ export default function AddTransactionModal({ fullWidth = false, defaultRecurrin
         type,
         date,
         isRecurring,
+        isShared,
       }),
     })
 
@@ -252,7 +256,7 @@ export default function AddTransactionModal({ fullWidth = false, defaultRecurrin
                       boxShadow: type === t ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
                     }}
                   >
-                    {t === 'expense' ? '💸 Utgift' : '💰 Inkomst'}
+                    {t === 'expense' ? <><TrendingDown size={14} /> Utgift</> : <><TrendingUp size={14} /> Inkomst</>}
                   </button>
                 ))}
               </div>
@@ -307,7 +311,7 @@ export default function AddTransactionModal({ fullWidth = false, defaultRecurrin
                     }}
                   >
                     {categories.map(c => (
-                      <option key={c.name} value={c.name}>{c.icon} {c.name}</option>
+                      <option key={c.name} value={c.name}>{c.name}</option>
                     ))}
                   </select>
                 </div>
@@ -341,13 +345,41 @@ export default function AddTransactionModal({ fullWidth = false, defaultRecurrin
                     width: '100%',
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>{isRecurring ? '🔁' : '1️⃣'}</span>
+                  <span style={{ display: 'flex' }}>{isRecurring ? <RefreshCw size={18} color={accent} /> : <Hash size={18} color="#94a3b8" />}</span>
                   <div>
                     <p style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', margin: 0 }}>
                       {isRecurring ? 'Återkommande varje månad' : 'Engångstransaktion'}
                     </p>
                     <p style={{ fontSize: 11, color: '#64748b', margin: 0, marginTop: 1 }}>
                       {isRecurring ? 'Visas under Återkommande' : 'Klicka för att markera som återkommande'}
+                    </p>
+                  </div>
+                </button>
+
+                {/* Shared / personal toggle */}
+                <button
+                  type="button"
+                  onClick={() => setIsShared(s => !s)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    border: `1px solid ${isShared ? '#bbf7d0' : '#fde68a'}`,
+                    backgroundColor: isShared ? '#f0fdf4' : '#fffbeb',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                  }}
+                >
+                  <span style={{ display: 'flex' }}>{isShared ? <Users size={18} color="#16a34a" /> : <Lock size={18} color="#d97706" />}</span>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', margin: 0 }}>
+                      {isShared ? 'Delad med hushållet' : 'Personlig (bara du ser den)'}
+                    </p>
+                    <p style={{ fontSize: 11, color: '#64748b', margin: 0, marginTop: 1 }}>
+                      {isShared ? 'Klicka för att göra den personlig' : 'Klicka för att dela med hushållet'}
                     </p>
                   </div>
                 </button>
@@ -386,7 +418,7 @@ export default function AddTransactionModal({ fullWidth = false, defaultRecurrin
                     opacity: saving ? 0.75 : 1,
                   }}
                 >
-                  {success ? '✓ Sparad!' : saving ? 'Sparar…' : type === 'expense' ? 'Spara utgift' : 'Spara inkomst'}
+                  {success ? 'Sparad!' : saving ? 'Sparar…' : type === 'expense' ? 'Spara utgift' : 'Spara inkomst'}
                 </button>
 
               </form>

@@ -62,6 +62,7 @@ export interface SupabaseTransaction {
   category: string
   transaction_date: string
   is_recurring: boolean
+  is_shared: boolean
   created_at: string
 }
 
@@ -72,6 +73,7 @@ export interface EnrichedTransaction {
   description: string
   date: string
   isRecurring: boolean
+  isShared: boolean
   category: {
     name: string
     color: string

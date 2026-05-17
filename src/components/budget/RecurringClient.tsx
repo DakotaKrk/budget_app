@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Trash2 } from 'lucide-react'
+import { Trash2, RefreshCw } from 'lucide-react'
 import { formatAmount } from '@/lib/utils'
 import AddTransactionModal from '@/components/budget/AddTransactionModal'
 import { EnrichedTransaction } from '@/types'
+import CategoryIcon from '@/components/budget/CategoryIcon'
 
 export default function RecurringClient() {
   const [expenses, setExpenses] = useState<EnrichedTransaction[]>([])
@@ -66,10 +67,10 @@ export default function RecurringClient() {
             style={{ borderBottom: i < items.length - 1 ? '1px solid #f1f5f9' : 'none' }}
           >
             <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0"
+              className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: (tx.category?.color ?? '#94a3b8') + '22' }}
             >
-              {tx.category?.icon ?? '📦'}
+              <CategoryIcon name={tx.category?.icon ?? 'Package'} size={16} color={tx.category?.color ?? '#94a3b8'} />
             </div>
             <div className="flex-1 min-w-0">
               <p style={{ fontSize: 14, fontWeight: 500, color: '#0f172a' }}>{tx.description}</p>
@@ -130,7 +131,7 @@ export default function RecurringClient() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div style={card}>
           <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-            <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>🔁 Utgifter</p>
+            <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}><RefreshCw size={15} color="#6366f1" /> Utgifter</p>
             {totalExp > 0 && (
               <span style={{ fontSize: 13, fontWeight: 700, color: '#6366f1' }}>−{formatAmount(totalExp)}/mån</span>
             )}
@@ -139,7 +140,7 @@ export default function RecurringClient() {
         </div>
         <div style={card}>
           <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-            <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>🔁 Inkomster</p>
+            <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}><RefreshCw size={15} color="#10b981" /> Inkomster</p>
             {totalInc > 0 && (
               <span style={{ fontSize: 13, fontWeight: 700, color: '#10b981' }}>+{formatAmount(totalInc)}/mån</span>
             )}

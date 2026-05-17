@@ -69,7 +69,7 @@ export async function PATCH(
   }
 
   const body = await req.json()
-  const { amount, description, category, date, isRecurring } = body
+  const { amount, description, category, date, isRecurring, isShared } = body
 
   if (!amount || !description?.trim() || !date) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -88,6 +88,7 @@ export async function PATCH(
       category: category?.trim() || 'Övrigt',
       transaction_date: date,
       is_recurring: isRecurring === true,
+      is_shared: isShared !== false,
     })
     .eq('id', id)
     .eq('household_id', membership.household_id)
@@ -107,6 +108,7 @@ export async function PATCH(
     description: tx.title,
     date: tx.transaction_date,
     isRecurring: tx.is_recurring ?? false,
+    isShared: tx.is_shared ?? true,
     category: { name: meta.name, color: meta.color, icon: meta.icon, type: tx.type },
   })
 }

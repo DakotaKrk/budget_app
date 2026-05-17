@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, Pencil } from 'lucide-react'
+import { Trash2, Pencil, RefreshCw, Hash, Users, Lock } from 'lucide-react'
 import { formatAmount, formatDate } from '@/lib/utils'
 import { CATEGORIES } from '@/lib/categories'
+import CategoryIcon from '@/components/budget/CategoryIcon'
 
 interface EnrichedTransaction {
   id: string
@@ -11,6 +12,7 @@ interface EnrichedTransaction {
   description: string
   date: string
   isRecurring?: boolean
+  isShared?: boolean
   category: { name: string; color: string; icon: string; type: 'income' | 'expense' } | null
 }
 
@@ -29,6 +31,7 @@ export default function TransactionList({ transactions, onDelete, onUpdated, emp
   const [editCat, setEditCat]       = useState('')
   const [editDate, setEditDate]     = useState('')
   const [editRecurring, setEditRecurring] = useState(false)
+  const [editShared, setEditShared]       = useState(true)
   const [saving, setSaving]         = useState(false)
   const [editError, setEditError]   = useState('')
 
@@ -39,6 +42,7 @@ export default function TransactionList({ transactions, onDelete, onUpdated, emp
     setEditCat(tx.category?.name ?? '')
     setEditDate(tx.date)
     setEditRecurring(tx.isRecurring ?? false)
+    setEditShared(tx.isShared ?? true)
     setEditError('')
   }
 
@@ -66,6 +70,7 @@ export default function TransactionList({ transactions, onDelete, onUpdated, emp
         category: editCat,
         date: editDate,
         isRecurring: editRecurring,
+        isShared: editShared,
       }),
     })
 
@@ -135,17 +140,18 @@ export default function TransactionList({ transactions, onDelete, onUpdated, emp
             style={{ borderBottom: i < transactions.length - 1 ? '1px solid #f1f5f9' : 'none' }}
           >
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
+              className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: (tx.category?.color ?? '#94a3b8') + '22' }}
             >
-              {tx.category?.icon ?? '📦'}
+              <CategoryIcon name={tx.category?.icon ?? 'Package'} size={15} color={tx.category?.color ?? '#94a3b8'} />
             </div>
 
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate" style={{ color: '#0f172a' }}>{tx.description}</p>
               <p className="text-xs" style={{ color: '#64748b' }}>
                 {tx.category?.name ?? 'Okategori'}
-                {tx.isRecurring && <span style={{ marginLeft: 6 }}>🔁</span>}
+                {tx.isRecurring && <span style={{ marginLeft: 6, display: 'inline-flex', verticalAlign: 'middle' }}><RefreshCw size={10} /></span>}
+                {tx.isShared === false && <span style={{ marginLeft: 6, display: 'inline-flex', verticalAlign: 'middle' }}><Lock size={10} color="#d97706" /></span>}
               </p>
             </div>
 
@@ -260,7 +266,7 @@ export default function TransactionList({ transactions, onDelete, onUpdated, emp
                   <label style={labelStyle}>Kategori</label>
                   <select value={editCat} onChange={e => setEditCat(e.target.value)} style={inputStyle}>
                     {editCategories.map(c => (
-                      <option key={c.name} value={c.name}>{c.icon} {c.name}</option>
+                      <option key={c.name} value={c.name}>{c.name}</option>
                     ))}
                   </select>
                 </div>
@@ -288,9 +294,27 @@ export default function TransactionList({ transactions, onDelete, onUpdated, emp
                     cursor: 'pointer', textAlign: 'left', width: '100%',
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>{editRecurring ? '🔁' : '1️⃣'}</span>
+                  <span style={{ display: 'flex' }}>{editRecurring ? <RefreshCw size={18} color="#6366f1" /> : <Hash size={18} color="#94a3b8" />}</span>
                   <p style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', margin: 0 }}>
                     {editRecurring ? 'Återkommande varje månad' : 'Engångstransaktion'}
+                  </p>
+                </button>
+
+                {/* Shared / personal toggle */}
+                <button
+                  type="button"
+                  onClick={() => setEditShared(s => !s)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 14px', borderRadius: 8,
+                    border: `1px solid ${editShared ? '#bbf7d0' : '#fde68a'}`,
+                    backgroundColor: editShared ? '#f0fdf4' : '#fffbeb',
+                    cursor: 'pointer', textAlign: 'left', width: '100%',
+                  }}
+                >
+                  <span style={{ display: 'flex' }}>{editShared ? <Users size={18} color="#16a34a" /> : <Lock size={18} color="#d97706" />}</span>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', margin: 0 }}>
+                    {editShared ? 'Delad med hushållet' : 'Personlig (bara du ser den)'}
                   </p>
                 </button>
 
