@@ -32,12 +32,12 @@ export default function LoginPage() {
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
-    border: '1px solid #e2e8f0',
+    border: '1px solid rgba(255,255,255,0.12)',
     borderRadius: 8,
     padding: '11px 14px',
     fontSize: 14,
-    color: '#0f172a',
-    backgroundColor: '#fff',
+    color: '#f1f5f9',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     outline: 'none',
   }
 
@@ -46,17 +46,28 @@ export default function LoginPage() {
       {/* Logo */}
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
         <span style={{ fontSize: 32 }}>💜</span>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0f172a', marginTop: 8, letterSpacing: '-0.5px' }}>
+        <h1 style={{
+          fontSize: 26, fontWeight: 800, marginTop: 8, letterSpacing: '-0.5px',
+          fontFamily: 'var(--font-space-grotesk)',
+          color: '#c4b5fd',
+        }}>
           Mony
         </h1>
-        <p style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>Logga in på ditt konto</p>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>Logga in på ditt konto</p>
       </div>
 
       {/* Card */}
-      <div style={{ backgroundColor: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', padding: 32 }}>
+      <div style={{
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        backdropFilter: 'blur(16px)',
+        borderRadius: 16,
+        border: '1px solid rgba(255,255,255,0.1)',
+        padding: 32,
+        boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
+      }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#374151', marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
               E-post
             </label>
             <input
@@ -72,10 +83,10 @@ export default function LoginPage() {
 
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>
                 Lösenord
               </label>
-              <Link href="/forgot-password" style={{ fontSize: 12, color: '#6366f1', textDecoration: 'none' }}>
+              <Link href="/forgot-password" style={{ fontSize: 12, color: '#a5b4fc', textDecoration: 'none' }}>
                 Glömt lösenordet?
               </Link>
             </div>
@@ -91,7 +102,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p style={{ fontSize: 13, color: '#ef4444', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 12px' }}>
+            <p style={{ fontSize: 13, color: '#fca5a5', backgroundColor: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: '10px 12px' }}>
               {error}
             </p>
           )}
@@ -102,7 +113,8 @@ export default function LoginPage() {
             style={{
               width: '100%',
               padding: '12px',
-              backgroundColor: loading ? '#818cf8' : '#6366f1',
+              background: loading ? 'rgba(99,102,241,0.6)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              boxShadow: loading ? 'none' : '0 0 24px rgba(99,102,241,0.4)',
               color: '#fff',
               border: 'none',
               borderRadius: 8,
@@ -118,9 +130,9 @@ export default function LoginPage() {
       </div>
 
       {/* Link to signup */}
-      <p style={{ textAlign: 'center', fontSize: 13, color: '#64748b', marginTop: 20 }}>
+      <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 20 }}>
         Har du inget konto?{' '}
-        <Link href="/signup" style={{ color: '#6366f1', fontWeight: 500, textDecoration: 'none' }}>
+        <Link href="/signup" style={{ color: '#a5b4fc', fontWeight: 500, textDecoration: 'none' }}>
           Skapa ett
         </Link>
       </p>

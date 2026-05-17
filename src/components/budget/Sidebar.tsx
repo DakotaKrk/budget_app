@@ -82,8 +82,14 @@ export default function Sidebar({ userEmail, householdName, inviteCode, onClose 
       {/* Logo */}
       <div className="px-5 pt-8 pb-4">
         <div className="flex items-center gap-2">
-          <span className="text-xl">💜</span>
-          <span style={{ color: '#e0e7ff', fontWeight: 800, fontSize: 18, letterSpacing: '-0.3px' }}>
+          <span style={{ fontSize: 20 }}>💜</span>
+          <span style={{
+            fontFamily: 'var(--font-space-grotesk)',
+            color: '#c4b5fd',
+            fontWeight: 800,
+            fontSize: 22,
+            letterSpacing: '-0.5px',
+          }}>
             Mony
           </span>
         </div>

@@ -43,17 +43,31 @@ export default function ShellClient({ userEmail, householdName, inviteCode, chil
       </div>
 
       {/* Main content area */}
-      <main className="flex-1 min-w-0 overflow-auto" style={{ backgroundColor: '#f8fafc' }}>
-        {/* Mobile-only top bar with hamburger + logo */}
-        <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 md:hidden">
+      <main className="flex-1 min-w-0 overflow-auto" style={{ backgroundColor: '#0d0d1b' }}>
+        {/* Mobile-only top bar */}
+        <div className="sticky top-0 z-30 flex items-center gap-3 md:hidden"
+          style={{
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
+            backgroundColor: 'rgba(13,13,27,0.85)',
+            backdropFilter: 'blur(12px)',
+            padding: '12px 16px',
+          }}
+        >
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Öppna meny"
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 active:bg-slate-200"
+            className="rounded-lg p-1.5"
+            style={{ color: '#a5b4fc', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             <Menu size={20} />
           </button>
-          <span style={{ color: '#1e1b4b', fontWeight: 800, fontSize: 16, letterSpacing: '-0.2px' }}>
+          <span style={{
+            fontFamily: 'var(--font-space-grotesk)',
+            color: '#c4b5fd',
+            fontWeight: 800,
+            fontSize: 18,
+            letterSpacing: '-0.3px',
+          }}>
             💜 Mony
           </span>
         </div>
