@@ -81,6 +81,7 @@ export default function TransactionPageClient({ type, month }: Props) {
         <TransactionList
           transactions={transactions}
           onDelete={handleDelete}
+          onUpdated={load}
           emptyMessage={`Inga ${isIncome ? 'intäkter' : 'utgifter'} denna månad`}
         />
       </div>
