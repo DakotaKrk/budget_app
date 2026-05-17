@@ -9,6 +9,7 @@ import PageHeader from '@/components/budget/PageHeader'
 import OverviewCharts from '@/components/budget/OverviewCharts'
 import MonthNav from '@/components/budget/MonthNav'
 import FeedbackCard from '@/components/budget/FeedbackCard'
+import CategoryIcon from '@/components/budget/CategoryIcon'
 
 interface Props {
   searchParams: Promise<{ month?: string }>
@@ -219,10 +220,10 @@ export default async function OverviewPage({ searchParams }: Props) {
                       style={{ borderBottom: i < recent.length - 1 ? '1px solid #f1f5f9' : 'none' }}
                     >
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
+                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                         style={{ backgroundColor: meta.color + '22' }}
                       >
-                        {meta.icon}
+                        <CategoryIcon name={meta.icon} size={15} color={meta.color} />
                       </div>
                       <span className="flex-1 text-sm truncate" style={{ color: '#0f172a' }}>{tx.title}</span>
                       <span className="text-xs flex-shrink-0" style={{ color: '#94a3b8' }}>{formatDate(tx.transaction_date)}</span>

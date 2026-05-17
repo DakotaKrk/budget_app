@@ -111,7 +111,7 @@ export default function TransactionForm({ type, defaultDate, onSaved }: Transact
         <label style={labelStyle}>Kategori</label>
         <select value={category} onChange={e => setCategory(e.target.value)} style={inputStyle}>
           {categories.map(c => (
-            <option key={c.name} value={c.name}>{c.icon} {c.name}</option>
+            <option key={c.name} value={c.name}>{c.name}</option>
           ))}
         </select>
       </div>
