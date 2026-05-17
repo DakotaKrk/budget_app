@@ -4,9 +4,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 const AUTH_PAGES = ['/login', '/signup']
 // /auth/callback must be public: the browser arrives here unauthenticated
 // carrying only a one-time PKCE code — the route exchanges it for a session.
+// /forgot-password and /reset-password are public so unauthenticated users
+// arriving from a reset email can reach them without being redirected to /login.
 // /onboarding is intentionally NOT public: only authenticated users reach it
 // (via the dashboard layout redirect after login / email confirmation).
-const PUBLIC_PAGES = ['/login', '/signup', '/auth/callback']
+const PUBLIC_PAGES = ['/login', '/signup', '/auth/callback', '/forgot-password', '/reset-password']
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
