@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { BarChart2, TrendingDown, TrendingUp, RefreshCw, Tag, LogOut, X, ShoppingBag, Smartphone } from 'lucide-react'
 import { signOut } from '@/app/actions/auth'
 import AddTransactionModal from '@/components/budget/AddTransactionModal'
@@ -25,6 +26,26 @@ interface SidebarProps {
 
 export default function Sidebar({ userEmail, householdName, inviteCode, onClose }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  async function handleDeleteAccount() {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      setTimeout(() => setConfirmDelete(false), 5000)
+      return
+    }
+    setDeleting(true)
+    const res = await fetch('/api/account', { method: 'DELETE' })
+    if (res.ok) {
+      router.push('/welcome')
+      router.refresh()
+    } else {
+      setDeleting(false)
+      setConfirmDelete(false)
+    }
+  }
 
   const linkStyle = (isActive: boolean) => ({
     display: 'flex',
@@ -127,6 +148,28 @@ export default function Sidebar({ userEmail, householdName, inviteCode, onClose 
             Logga ut
           </button>
         </form>
+
+        {/* Delete account */}
+        <button
+          type="button"
+          onClick={handleDeleteAccount}
+          disabled={deleting}
+          style={{
+            marginTop: 8,
+            background: 'none',
+            border: `1px solid ${confirmDelete ? '#ef4444' : 'transparent'}`,
+            borderRadius: 6,
+            padding: '5px 10px',
+            fontSize: 11,
+            color: confirmDelete ? '#fca5a5' : '#4338ca',
+            cursor: 'pointer',
+            width: '100%',
+            textAlign: 'left',
+            transition: 'all 0.15s',
+          }}
+        >
+          {deleting ? 'Raderar...' : confirmDelete ? '⚠️ Klicka igen för att bekräfta' : 'Radera mitt konto'}
+        </button>
       </div>
     </aside>
   )

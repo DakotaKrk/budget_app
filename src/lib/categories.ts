@@ -8,6 +8,7 @@ export interface CategoryMeta {
 export const CATEGORIES: CategoryMeta[] = [
   // Income
   { name: 'Lön',              icon: '💼', color: '#6366f1', type: 'income' },
+  { name: 'Pension',          icon: '🏦', color: '#8b5cf6', type: 'income' },
   { name: 'Vinted/Tradera',   icon: '👗', color: '#10b981', type: 'income' },
   { name: 'Secondhand',       icon: '🛍️', color: '#14b8a6', type: 'income' },
   { name: 'Återbetalning',    icon: '🏦', color: '#a855f7', type: 'income' },

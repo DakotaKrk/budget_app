@@ -8,6 +8,7 @@ import { SupabaseTransaction, MonthlySummary } from '@/types'
 import PageHeader from '@/components/budget/PageHeader'
 import OverviewCharts from '@/components/budget/OverviewCharts'
 import MonthNav from '@/components/budget/MonthNav'
+import FeedbackCard from '@/components/budget/FeedbackCard'
 
 interface Props {
   searchParams: Promise<{ month?: string }>
@@ -276,6 +277,9 @@ export default async function OverviewPage({ searchParams }: Props) {
           </div>
 
         </div>
+
+        {/* Feedback */}
+        <FeedbackCard />
 
       </div>
     </div>
