@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart2, TrendingDown, TrendingUp, RefreshCw, Tag, User, LogOut, X } from 'lucide-react'
+import { BarChart2, TrendingDown, TrendingUp, RefreshCw, Tag, User, LogOut, X, ShoppingBag } from 'lucide-react'
 import { signOut } from '@/app/actions/auth'
 import AddTransactionModal from '@/components/budget/AddTransactionModal'
 
@@ -11,6 +11,7 @@ const mainNav = [
   { href: '/utgifter', label: 'Utgifter', icon: TrendingDown },
   { href: '/intakter', label: 'Intäkter', icon: TrendingUp },
   { href: '/aterkommande', label: 'Återkommande', icon: RefreshCw },
+  { href: '/vinted', label: 'Vinted & Tradera', icon: ShoppingBag },
   { href: '/kategorier', label: 'Kategorier', icon: Tag },
 ]
 

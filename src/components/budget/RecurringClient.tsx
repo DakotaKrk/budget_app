@@ -3,13 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Trash2 } from 'lucide-react'
 import { formatAmount } from '@/lib/utils'
-
-interface EnrichedTransaction {
-  id: string
-  amount: number
-  description: string
-  category: { name: string; color: string; icon: string; type: 'income' | 'expense' } | null
-}
+import AddTransactionModal from '@/components/budget/AddTransactionModal'
+import { EnrichedTransaction } from '@/types'
 
 export default function RecurringClient() {
   const [expenses, setExpenses] = useState<EnrichedTransaction[]>([])
@@ -20,8 +15,8 @@ export default function RecurringClient() {
   const load = useCallback(async () => {
     setLoading(true)
     const [expRes, incRes] = await Promise.all([
-      fetch('/api/transactions?type=expense').then(r => r.json()),
-      fetch('/api/transactions?type=income').then(r => r.json()),
+      fetch('/api/transactions?type=expense&recurring=true').then(r => r.json()),
+      fetch('/api/transactions?type=income&recurring=true').then(r => r.json()),
     ])
     setExpenses(Array.isArray(expRes) ? expRes : [])
     setIncome(Array.isArray(incRes) ? incRes : [])
@@ -58,7 +53,7 @@ export default function RecurringClient() {
     if (items.length === 0) {
       return (
         <p style={{ color: '#64748b', fontSize: 13, padding: '16px 0' }}>
-          Inga {type === 'expense' ? 'utgifter' : 'inkomster'} ännu.
+          Inga återkommande {type === 'expense' ? 'utgifter' : 'inkomster'} ännu.
         </p>
       )
     }
@@ -107,13 +102,19 @@ export default function RecurringClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Add button */}
+      <div className="flex justify-end">
+        <AddTransactionModal defaultRecurring={true} />
+      </div>
+
+      {/* Summary cards */}
       {hasData && !loading && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { label: 'Total inkomst', value: `+${formatAmount(totalInc)}`, color: '#10b981' },
-            { label: 'Totala utgifter', value: `−${formatAmount(totalExp)}`, color: '#6366f1' },
+            { label: 'Återkommande inkomst/mån', value: `+${formatAmount(totalInc)}`, color: '#10b981' },
+            { label: 'Återkommande utgifter/mån', value: `−${formatAmount(totalExp)}`, color: '#6366f1' },
             {
-              label: 'Resultat',
+              label: 'Netto/månad',
               value: `${totalInc - totalExp >= 0 ? '+' : ''}${formatAmount(totalInc - totalExp)}`,
               color: totalInc - totalExp >= 0 ? '#10b981' : '#ef4444',
             },
@@ -128,11 +129,21 @@ export default function RecurringClient() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div style={card}>
-          <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>Utgifter</p>
+          <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
+            <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>🔁 Utgifter</p>
+            {totalExp > 0 && (
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#6366f1' }}>−{formatAmount(totalExp)}/mån</span>
+            )}
+          </div>
           {renderList(expenses, 'expense')}
         </div>
         <div style={card}>
-          <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>Inkomster</p>
+          <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
+            <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>🔁 Inkomster</p>
+            {totalInc > 0 && (
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#10b981' }}>+{formatAmount(totalInc)}/mån</span>
+            )}
+          </div>
           {renderList(income, 'income')}
         </div>
       </div>

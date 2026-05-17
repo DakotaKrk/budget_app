@@ -7,10 +7,11 @@ export interface CategoryMeta {
 
 export const CATEGORIES: CategoryMeta[] = [
   // Income
-  { name: 'Lön',           icon: '💼', color: '#6366f1', type: 'income' },
-  { name: 'Secondhand',    icon: '👗', color: '#10b981', type: 'income' },
-  { name: 'Återbetalning', icon: '🏦', color: '#a855f7', type: 'income' },
-  { name: 'Övrigt inkomst',icon: '🎁', color: '#f59e0b', type: 'income' },
+  { name: 'Lön',              icon: '💼', color: '#6366f1', type: 'income' },
+  { name: 'Vinted/Tradera',   icon: '👗', color: '#10b981', type: 'income' },
+  { name: 'Secondhand',       icon: '🛍️', color: '#14b8a6', type: 'income' },
+  { name: 'Återbetalning',    icon: '🏦', color: '#a855f7', type: 'income' },
+  { name: 'Övrigt inkomst',   icon: '🎁', color: '#f59e0b', type: 'income' },
   // Expense
   { name: 'Mat & Dryck',      icon: '🛒', color: '#ef4444', type: 'expense' },
   { name: 'Hyra & Bostad',    icon: '🏠', color: '#6366f1', type: 'expense' },

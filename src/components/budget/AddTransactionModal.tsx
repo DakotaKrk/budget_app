@@ -10,22 +10,25 @@ type TxType = 'income' | 'expense'
 interface Props {
   /** Renders the trigger as a full-width block (for the sidebar) */
   fullWidth?: boolean
+  /** Pre-select recurring and lock the toggle */
+  defaultRecurring?: boolean
 }
 
 const accentFor = (t: TxType) => (t === 'income' ? '#10b981' : '#6366f1')
 const lightFor  = (t: TxType) => (t === 'income' ? '#ecfdf5'  : '#eef2ff')
 
-export default function AddTransactionModal({ fullWidth = false }: Props) {
+export default function AddTransactionModal({ fullWidth = false, defaultRecurring = false }: Props) {
   const router = useRouter()
-  const [open, setOpen]       = useState(false)
-  const [type, setType]       = useState<TxType>('expense')
-  const [amount, setAmount]   = useState('')
-  const [title, setTitle]     = useState('')
-  const [category, setCategory] = useState('')
-  const [date, setDate]       = useState(todayISO())
-  const [saving, setSaving]   = useState(false)
-  const [error, setError]     = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const [open, setOpen]             = useState(false)
+  const [type, setType]             = useState<TxType>('expense')
+  const [amount, setAmount]         = useState('')
+  const [title, setTitle]           = useState('')
+  const [category, setCategory]     = useState('')
+  const [date, setDate]             = useState(todayISO())
+  const [isRecurring, setIsRecurring] = useState(defaultRecurring)
+  const [saving, setSaving]         = useState(false)
+  const [error, setError]           = useState<string | null>(null)
+  const [success, setSuccess]       = useState(false)
   const amountRef = useRef<HTMLInputElement>(null)
 
   const categories = CATEGORIES.filter(c => c.type === type)
@@ -38,6 +41,7 @@ export default function AddTransactionModal({ fullWidth = false }: Props) {
     setTitle('')
     setCategory(defaultCats[0]?.name ?? '')
     setDate(todayISO())
+    setIsRecurring(defaultRecurring)
     setError(null)
     setSuccess(false)
     setOpen(true)
@@ -84,6 +88,7 @@ export default function AddTransactionModal({ fullWidth = false }: Props) {
         category: category || (type === 'income' ? 'Övrigt inkomst' : 'Övrigt utgift'),
         type,
         date,
+        isRecurring,
       }),
     })
 
@@ -318,6 +323,34 @@ export default function AddTransactionModal({ fullWidth = false }: Props) {
                     style={inputStyle}
                   />
                 </div>
+
+                {/* Recurring toggle */}
+                <button
+                  type="button"
+                  onClick={() => setIsRecurring(r => !r)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    border: `1px solid ${isRecurring ? accent + '66' : '#e2e8f0'}`,
+                    backgroundColor: isRecurring ? light : '#f8fafc',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                  }}
+                >
+                  <span style={{ fontSize: 18 }}>{isRecurring ? '🔁' : '1️⃣'}</span>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', margin: 0 }}>
+                      {isRecurring ? 'Återkommande varje månad' : 'Engångstransaktion'}
+                    </p>
+                    <p style={{ fontSize: 11, color: '#64748b', margin: 0, marginTop: 1 }}>
+                      {isRecurring ? 'Visas under Återkommande' : 'Klicka för att markera som återkommande'}
+                    </p>
+                  </div>
+                </button>
 
                 {/* Error */}
                 {error && (

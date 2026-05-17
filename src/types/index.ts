@@ -61,6 +61,7 @@ export interface SupabaseTransaction {
   type: 'income' | 'expense'
   category: string
   transaction_date: string
+  is_recurring: boolean
   created_at: string
 }
 
@@ -70,7 +71,7 @@ export interface EnrichedTransaction {
   amount: number
   description: string
   date: string
-  isRecurring: false
+  isRecurring: boolean
   category: {
     name: string
     color: string

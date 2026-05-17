@@ -27,7 +27,7 @@ function enrich(tx: SupabaseTransaction): EnrichedTransaction {
     amount: Number(tx.amount),
     description: tx.title,
     date: tx.transaction_date,
-    isRecurring: false,
+    isRecurring: tx.is_recurring ?? false,
     category: {
       name: meta.name,
       color: meta.color,
@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const month = searchParams.get('month')
   const type = searchParams.get('type') as 'income' | 'expense' | null
+  const recurring = searchParams.get('recurring')
 
   let query = admin
     .from('transactions')
@@ -62,6 +63,8 @@ export async function GET(req: NextRequest) {
   }
 
   if (type) query = query.eq('type', type)
+  if (recurring === 'true') query = query.eq('is_recurring', true)
+  if (recurring === 'false') query = query.eq('is_recurring', false)
 
   const { data, error } = await query
   if (error) {
@@ -79,7 +82,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { amount, description, category, type, date } = body
+  const { amount, description, category, type, date, isRecurring } = body
 
   if (!amount || !description?.trim() || !type || !date) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -102,6 +105,7 @@ export async function POST(req: NextRequest) {
       type,
       category: categoryName,
       transaction_date: date,
+      is_recurring: isRecurring === true,
     })
     .select()
     .single()
