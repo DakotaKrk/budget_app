@@ -14,11 +14,11 @@ export default function PageHeader({ title, subtitle, month, showMonthNav = fals
       className="flex items-center justify-between px-0 pb-7"
     >
       <div>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: 'rgba(255,255,255,0.85)', letterSpacing: '-0.5px' }}>
           {title}
         </h1>
         {subtitle && (
-          <p style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>{subtitle}</p>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>{subtitle}</p>
         )}
       </div>
       {showMonthNav && month && (

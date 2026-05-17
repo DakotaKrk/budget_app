@@ -30,19 +30,19 @@ export default function MonthNav({ month }: { month: string }) {
     <div className="flex items-center gap-2">
       <button
         onClick={() => navigate(-1)}
-        className="w-8 h-8 flex items-center justify-center rounded-lg border text-sm transition-colors cursor-pointer"
-        style={{ borderColor: '#e2e8f0', background: '#fff', color: '#64748b' }}
+        className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer"
+        style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#c4b5fd' }}
       >
         <ChevronLeft size={16} />
       </button>
-      <span style={{ fontSize: 14, fontWeight: 500, color: '#0f172a', minWidth: 130, textAlign: 'center' }}>
+      <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.75)', minWidth: 130, textAlign: 'center' }}>
         {formatLabel(month)}
       </span>
       <button
         onClick={() => navigate(1)}
         disabled={month >= today}
-        className="w-8 h-8 flex items-center justify-center rounded-lg border text-sm transition-colors cursor-pointer disabled:opacity-30"
-        style={{ borderColor: '#e2e8f0', background: '#fff', color: '#64748b' }}
+        className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer disabled:opacity-30"
+        style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)', color: '#c4b5fd' }}
       >
         <ChevronRight size={16} />
       </button>

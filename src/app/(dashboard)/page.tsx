@@ -16,10 +16,11 @@ interface Props {
 }
 
 const card = {
-  backgroundColor: '#fff',
+  backgroundColor: '#f8f7ff',
   borderRadius: 12,
-  border: '1px solid #e2e8f0',
+  border: '1px solid rgba(99,102,241,0.1)',
   padding: '20px 24px',
+  boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
 } as React.CSSProperties
 
 function buildSummary(all: SupabaseTransaction[], month: string): MonthlySummary {
