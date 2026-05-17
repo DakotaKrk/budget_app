@@ -9,7 +9,7 @@ interface EnrichedTransaction {
   amount: number
   description: string
   date: string
-  isRecurring: boolean
+  isRecurring?: boolean
   category: { name: string; color: string; icon: string; type: 'income' | 'expense' } | null
 }
 
@@ -58,7 +58,7 @@ export default function TransactionList({ transactions, onDelete, emptyMessage }
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate" style={{ color: '#0f172a' }}>{tx.description}</p>
             <p className="text-xs" style={{ color: '#64748b' }}>
-              {tx.category?.name ?? 'Okategori'}{tx.isRecurring ? ' · 🔁' : ''}
+              {tx.category?.name ?? 'Okategori'}
             </p>
           </div>
 

@@ -1,12 +1,33 @@
-import Sidebar from '@/components/budget/Sidebar'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import ShellClient from '@/components/budget/ShellClient'
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const { data: membership } = await supabase
+    .from('household_members')
+    .select('household_id, role, households(id, name, invite_code)')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single()
+
+  if (!membership) redirect('/onboarding')
+
+  const household = Array.isArray(membership.households)
+    ? membership.households[0]
+    : membership.households
+
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <main className="flex-1 overflow-auto" style={{ backgroundColor: '#f8fafc' }}>
-        {children}
-      </main>
-    </div>
+    <ShellClient
+      userEmail={user.email ?? ''}
+      householdName={household?.name ?? ''}
+      inviteCode={household?.invite_code ?? ''}
+    >
+      {children}
+    </ShellClient>
   )
 }

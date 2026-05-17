@@ -1,54 +1,115 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readData, writeData, generateId } from '@/lib/db'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getCategoryMeta } from '@/lib/categories'
+import { SupabaseTransaction, EnrichedTransaction } from '@/types'
+
+async function getAuthedUser() {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) return { user: null, admin: null, householdId: null }
+
+  const admin = createAdminClient()
+  const { data: membership } = await admin
+    .from('household_members')
+    .select('household_id')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single()
+
+  return { user, admin, householdId: membership?.household_id ?? null }
+}
+
+function enrich(tx: SupabaseTransaction): EnrichedTransaction {
+  const meta = getCategoryMeta(tx.category, tx.type)
+  return {
+    id: tx.id,
+    amount: Number(tx.amount),
+    description: tx.title,
+    date: tx.transaction_date,
+    isRecurring: false,
+    category: {
+      name: meta.name,
+      color: meta.color,
+      icon: meta.icon,
+      type: tx.type,
+    },
+  }
+}
 
 export async function GET(req: NextRequest) {
-  const month = req.nextUrl.searchParams.get('month')
-  const type = req.nextUrl.searchParams.get('type')
-  const recurring = req.nextUrl.searchParams.get('recurring')
-
-  const data = readData()
-  const catMap = new Map(data.categories.map(c => [c.id, c]))
-
-  let txs = data.transactions
-
-  if (month) txs = txs.filter(t => t.date.startsWith(month))
-  if (recurring === 'true') txs = txs.filter(t => t.isRecurring)
-
-  if (type) {
-    txs = txs.filter(t => {
-      const cat = t.categoryId ? catMap.get(t.categoryId) : null
-      return cat?.type === type
-    })
+  const { user, admin, householdId } = await getAuthedUser()
+  if (!user || !admin || !householdId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const enriched = txs
-    .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt))
-    .map(t => ({
-      ...t,
-      category: t.categoryId ? catMap.get(t.categoryId) ?? null : null,
-    }))
+  const { searchParams } = new URL(req.url)
+  const month = searchParams.get('month')
+  const type = searchParams.get('type') as 'income' | 'expense' | null
 
-  return NextResponse.json(enriched)
+  let query = admin
+    .from('transactions')
+    .select('*')
+    .eq('household_id', householdId)
+    .order('transaction_date', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  if (month) {
+    const start = `${month}-01`
+    const [y, m] = month.split('-').map(Number)
+    const nextMonth = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, '0')}-01`
+    query = query.gte('transaction_date', start).lt('transaction_date', nextMonth)
+  }
+
+  if (type) query = query.eq('type', type)
+
+  const { data, error } = await query
+  if (error) {
+    console.error('[GET /api/transactions]', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json((data as SupabaseTransaction[]).map(enrich))
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const data = readData()
-
-  const tx = {
-    id: generateId(),
-    amount: Number(body.amount),
-    description: String(body.description),
-    categoryId: body.categoryId ?? null,
-    date: String(body.date),
-    isRecurring: Boolean(body.isRecurring),
-    recurringInterval: body.recurringInterval ?? null,
-    createdAt: new Date().toISOString(),
+  const { user, admin, householdId } = await getAuthedUser()
+  if (!user || !admin || !householdId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  data.transactions.push(tx)
-  writeData(data)
+  const body = await req.json()
+  const { amount, description, category, type, date } = body
 
-  const cat = tx.categoryId ? data.categories.find(c => c.id === tx.categoryId) ?? null : null
-  return NextResponse.json({ ...tx, category: cat }, { status: 201 })
+  if (!amount || !description?.trim() || !type || !date) {
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  }
+
+  const num = Number(amount)
+  if (isNaN(num) || num <= 0) {
+    return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
+  }
+
+  const categoryName = category?.trim() || (type === 'income' ? 'Övrigt inkomst' : 'Övrigt utgift')
+
+  const { data, error } = await admin
+    .from('transactions')
+    .insert({
+      household_id: householdId,
+      user_id: user.id,
+      title: description.trim(),
+      amount: num,
+      type,
+      category: categoryName,
+      transaction_date: date,
+    })
+    .select()
+    .single()
+
+  if (error || !data) {
+    console.error('[POST /api/transactions]', error)
+    return NextResponse.json({ error: error?.message ?? 'Insert failed' }, { status: 500 })
+  }
+
+  return NextResponse.json(enrich(data as SupabaseTransaction), { status: 201 })
 }

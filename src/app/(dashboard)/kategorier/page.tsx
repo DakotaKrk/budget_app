@@ -3,7 +3,7 @@ import CategoriesClient from '@/components/budget/CategoriesClient'
 
 export default function KategorierPage() {
   return (
-    <div style={{ padding: '32px 36px' }}>
+    <div className="px-4 py-5 sm:px-9 sm:py-8">
       <PageHeader title="Kategorier" />
       <CategoriesClient />
     </div>

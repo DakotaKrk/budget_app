@@ -10,7 +10,7 @@ interface EnrichedTransaction {
   amount: number
   description: string
   date: string
-  isRecurring: boolean
+  isRecurring?: boolean
   category: { name: string; color: string; icon: string; type: 'income' | 'expense' } | null
 }
 
@@ -42,7 +42,7 @@ export default function TransactionPageClient({ type, month }: Props) {
   const lightBg = isIncome ? '#ecfdf5' : '#eef2ff'
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 24, alignItems: 'start' }}>
+    <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6 items-start">
       {/* Form */}
       <div style={{ backgroundColor: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', padding: 24 }}>
         <p style={{ fontSize: 15, fontWeight: 600, color: '#0f172a', marginBottom: 20 }}>

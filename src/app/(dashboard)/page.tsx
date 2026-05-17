@@ -1,6 +1,10 @@
 import { Suspense } from 'react'
-import { computeSummary, readData } from '@/lib/db'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentMonth, formatAmount, formatDate } from '@/lib/utils'
+import { getCategoryMeta } from '@/lib/categories'
+import { SupabaseTransaction, MonthlySummary } from '@/types'
 import PageHeader from '@/components/budget/PageHeader'
 import OverviewCharts from '@/components/budget/OverviewCharts'
 import MonthNav from '@/components/budget/MonthNav'
@@ -16,34 +20,130 @@ const card = {
   padding: '20px 24px',
 } as React.CSSProperties
 
+function buildSummary(all: SupabaseTransaction[], month: string): MonthlySummary {
+  const [y, m] = month.split('-').map(Number)
+
+  const monthTxs = all.filter(t => t.transaction_date.startsWith(month))
+  let income = 0
+  let expenses = 0
+  const byCatMap = new Map<string, { total: number; type: 'income' | 'expense' }>()
+
+  for (const tx of monthTxs) {
+    const amt = Number(tx.amount)
+    if (tx.type === 'income') income += amt
+    else expenses += amt
+    const key = `${tx.category}::${tx.type}`
+    const prev = byCatMap.get(key)
+    byCatMap.set(key, { total: (prev?.total ?? 0) + amt, type: tx.type })
+  }
+
+  const byCategory = Array.from(byCatMap.entries())
+    .map(([key, { total, type }]) => {
+      const name = key.split('::')[0]
+      const meta = getCategoryMeta(name, type)
+      return { name, color: meta.color, icon: meta.icon, type, total }
+    })
+    .sort((a, b) => b.total - a.total)
+
+  const lastSixMonths: MonthlySummary['lastSixMonths'] = []
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(y, m - 1 - i, 1)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    let inc = 0, exp = 0
+    for (const tx of all.filter(t => t.transaction_date.startsWith(key))) {
+      if (tx.type === 'income') inc += Number(tx.amount)
+      else exp += Number(tx.amount)
+    }
+    lastSixMonths.push({ month: key, income: inc, expenses: exp })
+  }
+
+  return { income, expenses, result: income - expenses, byCategory, lastSixMonths }
+}
+
 export default async function OverviewPage({ searchParams }: Props) {
   const { month: qMonth } = await searchParams
   const month = qMonth ?? getCurrentMonth()
 
-  const data = readData()
-  const summary = computeSummary(data, month)
+  // Auth
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  const catMap = new Map(data.categories.map(c => [c.id, c]))
-  const recent = data.transactions
-    .filter(t => t.date.startsWith(month))
-    .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt))
+  const admin = createAdminClient()
+
+  // Household membership
+  const { data: membership } = await admin
+    .from('household_members')
+    .select('household_id, role, households(id, name)')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single()
+
+  if (!membership) redirect('/onboarding')
+
+  const householdId = membership.household_id
+
+  // Fetch 6 months of transactions in one query
+  const [y, m] = month.split('-').map(Number)
+  const sixMonthsAgo = new Date(y, m - 1 - 5, 1)
+  const startDate = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, '0')}-01`
+  const nextMonthDate = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, '0')}-01`
+
+  const { data: txData } = await admin
+    .from('transactions')
+    .select('*')
+    .eq('household_id', householdId)
+    .gte('transaction_date', startDate)
+    .lt('transaction_date', nextMonthDate)
+    .order('transaction_date', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  const all = (txData ?? []) as SupabaseTransaction[]
+  const summary = buildSummary(all, month)
+
+  // Recent transactions for the current month (latest 8)
+  const recent = all
+    .filter(t => t.transaction_date.startsWith(month))
     .slice(0, 8)
-    .map(t => ({ ...t, category: t.categoryId ? (catMap.get(t.categoryId) ?? null) : null }))
+
+  // Household members
+  const { data: membersData } = await admin
+    .from('household_members')
+    .select('user_id, role, created_at')
+    .eq('household_id', householdId)
+    .order('created_at', { ascending: true })
+
+  const members = membersData ?? []
+
+  // Resolve member emails via admin auth API
+  const memberDetails = await Promise.all(
+    members.map(async (mem) => {
+      const { data } = await admin.auth.admin.getUserById(mem.user_id)
+      return {
+        userId: mem.user_id,
+        role: mem.role as string,
+        email: data.user?.email ?? `${mem.user_id.slice(0, 8)}…`,
+        isYou: mem.user_id === user.id,
+      }
+    }),
+  )
 
   return (
     <div>
-      <div style={{ padding: '32px 36px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+      {/* Page header */}
+      <div className="px-4 pt-5 pb-0 sm:px-9 sm:pt-8">
+        <div className="flex items-center justify-between mb-6 sm:mb-7">
           <PageHeader title="Översikt" />
           <Suspense>
             <MonthNav month={month} />
           </Suspense>
         </div>
       </div>
-      <div style={{ padding: '0 36px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-        {/* Summary cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+      <div className="px-4 pb-8 sm:px-9 flex flex-col gap-5">
+
+        {/* Summary cards — 1 col on mobile, 3 cols on sm+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div style={card}>
             <p style={{ fontSize: 11, color: '#64748b', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Inkomster</p>
             <p style={{ fontSize: 28, fontWeight: 700, color: '#10b981', letterSpacing: '-0.5px' }}>+{formatAmount(summary.income)}</p>
@@ -65,39 +165,85 @@ export default async function OverviewPage({ searchParams }: Props) {
           <OverviewCharts summary={summary} />
         </Suspense>
 
-        {/* Recent transactions */}
-        <div style={card}>
-          <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>Senaste transaktioner</p>
-          {recent.length === 0 ? (
-            <p style={{ color: '#64748b', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>
-              Inga transaktioner denna månad
-            </p>
-          ) : (
-            <div>
-              {recent.map((tx, i) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center gap-3 py-2.5"
-                  style={{ borderBottom: i < recent.length - 1 ? '1px solid #f1f5f9' : 'none' }}
-                >
+        {/* Bottom row: recent transactions + members */}
+        {/* Stacks on mobile, side-by-side on xl+ */}
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_260px] gap-4 items-start">
+
+          {/* Recent transactions */}
+          <div style={card}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>Senaste transaktioner</p>
+            {recent.length === 0 ? (
+              <p style={{ color: '#64748b', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>
+                Inga transaktioner denna månad
+              </p>
+            ) : (
+              <div>
+                {recent.map((tx, i) => {
+                  const meta = getCategoryMeta(tx.category, tx.type)
+                  return (
+                    <div
+                      key={tx.id}
+                      className="flex items-center gap-3 py-2.5"
+                      style={{ borderBottom: i < recent.length - 1 ? '1px solid #f1f5f9' : 'none' }}
+                    >
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
+                        style={{ backgroundColor: meta.color + '22' }}
+                      >
+                        {meta.icon}
+                      </div>
+                      <span className="flex-1 text-sm truncate" style={{ color: '#0f172a' }}>{tx.title}</span>
+                      <span className="text-xs flex-shrink-0" style={{ color: '#94a3b8' }}>{formatDate(tx.transaction_date)}</span>
+                      <span
+                        className="text-sm font-semibold flex-shrink-0"
+                        style={{ color: tx.type === 'income' ? '#10b981' : '#6366f1', minWidth: 90, textAlign: 'right' }}
+                      >
+                        {tx.type === 'income' ? '+' : '−'}{formatAmount(Number(tx.amount))}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Household members */}
+          <div style={card}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>Hushållsmedlemmar</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {memberDetails.map((mem) => (
+                <div key={mem.userId} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
-                    style={{ backgroundColor: (tx.category?.color ?? '#94a3b8') + '22' }}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      backgroundColor: mem.role === 'owner' ? '#312e8133' : '#e0e7ff',
+                      border: `2px solid ${mem.role === 'owner' ? '#6366f1' : '#c7d2fe'}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: '#4338ca',
+                      flexShrink: 0,
+                    }}
                   >
-                    {tx.category?.icon ?? '📦'}
+                    {mem.email[0].toUpperCase()}
                   </div>
-                  <span className="flex-1 text-sm" style={{ color: '#0f172a' }}>{tx.description}</span>
-                  <span className="text-xs flex-shrink-0" style={{ color: '#94a3b8' }}>{formatDate(tx.date)}</span>
-                  <span
-                    className="text-sm font-semibold flex-shrink-0"
-                    style={{ color: tx.category?.type === 'income' ? '#10b981' : '#6366f1', minWidth: 90, textAlign: 'right' }}
-                  >
-                    {tx.category?.type === 'income' ? '+' : '−'}{formatAmount(tx.amount)}
-                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 12, color: '#0f172a', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {mem.email}{mem.isYou ? ' (du)' : ''}
+                    </p>
+                    <p style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                      {mem.role === 'owner' ? 'Ägare' : 'Medlem'}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
-          )}
+          </div>
+
         </div>
 
       </div>

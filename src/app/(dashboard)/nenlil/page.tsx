@@ -11,7 +11,7 @@ export default async function NenlilPage({ searchParams }: Props) {
   const activeMonth = month ?? getCurrentMonth()
 
   return (
-    <div style={{ padding: '32px 32px' }}>
+    <div className="px-4 py-5 sm:px-8 sm:py-8">
       <PageHeader
         title="Nenlil"
         subtitle="Personliga kostnader per månad"

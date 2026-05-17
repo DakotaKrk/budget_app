@@ -37,7 +37,7 @@ export interface MonthlySummary {
   expenses: number
   result: number
   byCategory: Array<{
-    categoryId: string
+    categoryId?: string
     name: string
     color: string
     icon: string
@@ -49,6 +49,34 @@ export interface MonthlySummary {
     income: number
     expenses: number
   }>
+}
+
+/** Shape returned by the Supabase `transactions` table */
+export interface SupabaseTransaction {
+  id: string
+  household_id: string
+  user_id: string
+  title: string
+  amount: number
+  type: 'income' | 'expense'
+  category: string
+  transaction_date: string
+  created_at: string
+}
+
+/** Normalised shape consumed by client components */
+export interface EnrichedTransaction {
+  id: string
+  amount: number
+  description: string
+  date: string
+  isRecurring: false
+  category: {
+    name: string
+    color: string
+    icon: string
+    type: 'income' | 'expense'
+  } | null
 }
 
 export type Page = 'overview' | 'expenses' | 'income' | 'recurring' | 'categories'

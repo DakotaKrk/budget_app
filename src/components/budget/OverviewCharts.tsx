@@ -17,7 +17,7 @@ export default function OverviewCharts({ summary }: { summary: MonthlySummary })
   }))
 
   return (
-    <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1.3fr' }}>
+    <div className="grid grid-cols-1 md:grid-cols-[1fr_1.3fr] gap-4">
       {/* Pie chart */}
       <div style={{ backgroundColor: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', padding: '20px 24px' }}>
         <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>Utgifter per kategori</p>

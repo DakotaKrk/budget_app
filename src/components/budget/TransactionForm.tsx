@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Category } from '@/types'
+import { useState } from 'react'
+import { CATEGORIES } from '@/lib/categories'
 import { todayISO } from '@/lib/utils'
 
 interface TransactionFormProps {
@@ -10,32 +10,16 @@ interface TransactionFormProps {
   onSaved: () => void
 }
 
-const INTERVALS = [
-  { value: 'monthly', label: 'Varje månad' },
-  { value: 'weekly', label: 'Varje vecka' },
-  { value: 'yearly', label: 'Varje år' },
-]
-
 export default function TransactionForm({ type, defaultDate, onSaved }: TransactionFormProps) {
-  const [categories, setCategories] = useState<Category[]>([])
+  const categories = CATEGORIES.filter(c => c.type === type)
+
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
-  const [categoryId, setCategoryId] = useState('')
+  const [category, setCategory] = useState(categories[0]?.name ?? '')
   const [date, setDate] = useState(defaultDate ?? todayISO())
-  const [isRecurring, setIsRecurring] = useState(false)
-  const [interval, setInterval] = useState('monthly')
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
-
-  useEffect(() => {
-    fetch('/api/categories')
-      .then(r => r.json())
-      .then((cats: Category[]) => {
-        const filtered = cats.filter(c => c.type === type)
-        setCategories(filtered)
-        if (filtered.length > 0) setCategoryId(filtered[0].id)
-      })
-  }, [type])
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -43,24 +27,32 @@ export default function TransactionForm({ type, defaultDate, onSaved }: Transact
     if (isNaN(num) || num <= 0 || !description.trim()) return
 
     setSaving(true)
-    await fetch('/api/transactions', {
+    setError(null)
+
+    const res = await fetch('/api/transactions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         amount: num,
         description: description.trim(),
-        categoryId: categoryId || null,
+        category: category || (type === 'income' ? 'Övrigt inkomst' : 'Övrigt utgift'),
+        type,
         date,
-        isRecurring,
-        recurringInterval: isRecurring ? interval : null,
       }),
     })
+
     setSaving(false)
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      setError(body.error ?? 'Något gick fel')
+      return
+    }
+
     setSuccess(true)
     setAmount('')
     setDescription('')
     setDate(defaultDate ?? todayISO())
-    setIsRecurring(false)
     onSaved()
     setTimeout(() => setSuccess(false), 2000)
   }
@@ -117,9 +109,9 @@ export default function TransactionForm({ type, defaultDate, onSaved }: Transact
 
       <div>
         <label style={labelStyle}>Kategori</label>
-        <select value={categoryId} onChange={e => setCategoryId(e.target.value)} style={inputStyle}>
+        <select value={category} onChange={e => setCategory(e.target.value)} style={inputStyle}>
           {categories.map(c => (
-            <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
+            <option key={c.name} value={c.name}>{c.icon} {c.name}</option>
           ))}
         </select>
       </div>
@@ -129,22 +121,9 @@ export default function TransactionForm({ type, defaultDate, onSaved }: Transact
         <input type="date" value={date} onChange={e => setDate(e.target.value)} required style={inputStyle} />
       </div>
 
-      <div style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: '12px 14px', backgroundColor: isRecurring ? '#f8fafc' : '#fff' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, color: '#0f172a' }}>
-          <input
-            type="checkbox"
-            checked={isRecurring}
-            onChange={e => setIsRecurring(e.target.checked)}
-            style={{ width: 16, height: 16, accentColor }}
-          />
-          Återkommande
-        </label>
-        {isRecurring && (
-          <select value={interval} onChange={e => setInterval(e.target.value)} style={{ ...inputStyle, marginTop: 10 }}>
-            {INTERVALS.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
-          </select>
-        )}
-      </div>
+      {error && (
+        <p style={{ fontSize: 13, color: '#ef4444', margin: 0 }}>{error}</p>
+      )}
 
       <button
         type="submit"

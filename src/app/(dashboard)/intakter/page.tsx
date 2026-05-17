@@ -11,8 +11,8 @@ export default async function IntakterPage({ searchParams }: Props) {
   const month = qMonth ?? getCurrentMonth()
 
   return (
-    <div style={{ padding: '32px 36px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+    <div className="px-4 py-5 sm:px-9 sm:py-8">
+      <div className="flex items-center justify-between mb-6 sm:mb-7">
         <PageHeader title="Intäkter" />
         <Suspense>
           <MonthNav month={month} />
