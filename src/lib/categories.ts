@@ -33,6 +33,7 @@ export const CATEGORIES: CategoryMeta[] = [
   { name: 'Försäkring privat',  icon: 'Shield',           color: '#64748b', type: 'expense' },
   { name: 'Försäkring djur',    icon: 'PawPrint',         color: '#a16207', type: 'expense' },
   { name: 'Barn & Familj',      icon: 'Baby',             color: '#f472b6', type: 'expense' },
+  { name: 'Sparande',            icon: 'PiggyBank',        color: '#22c55e', type: 'expense' },
   { name: 'Övrigt utgift',      icon: 'Package',          color: '#94a3b8', type: 'expense' },
 ]
 
