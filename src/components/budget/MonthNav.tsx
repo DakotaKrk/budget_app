@@ -1,0 +1,51 @@
+'use client'
+
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+
+function addMonths(month: string, delta: number): string {
+  const [y, m] = month.split('-').map(Number)
+  const d = new Date(y, m - 1 + delta, 1)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+function formatLabel(month: string): string {
+  const [y, m] = month.split('-').map(Number)
+  return new Date(y, m - 1, 1).toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' })
+}
+
+export default function MonthNav({ month }: { month: string }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const today = new Date().toISOString().slice(0, 7)
+
+  function navigate(delta: number) {
+    const next = addMonths(month, delta)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('month', next)
+    router.push(`?${params.toString()}`)
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => navigate(-1)}
+        className="w-8 h-8 flex items-center justify-center rounded-lg border text-sm transition-colors cursor-pointer"
+        style={{ borderColor: '#e2e8f0', background: '#fff', color: '#64748b' }}
+      >
+        <ChevronLeft size={16} />
+      </button>
+      <span style={{ fontSize: 14, fontWeight: 500, color: '#0f172a', minWidth: 130, textAlign: 'center' }}>
+        {formatLabel(month)}
+      </span>
+      <button
+        onClick={() => navigate(1)}
+        disabled={month >= today}
+        className="w-8 h-8 flex items-center justify-center rounded-lg border text-sm transition-colors cursor-pointer disabled:opacity-30"
+        style={{ borderColor: '#e2e8f0', background: '#fff', color: '#64748b' }}
+      >
+        <ChevronRight size={16} />
+      </button>
+    </div>
+  )
+}
