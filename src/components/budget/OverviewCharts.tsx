@@ -34,7 +34,7 @@ export default function OverviewCharts({ summary }: { summary: MonthlySummary })
                   {expenseCategories.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                 </Pie>
                 <Tooltip
-                  formatter={(v: number) => [formatAmount(v), '']}
+                  formatter={(value) => [formatAmount(Number(value)), "Belopp"]}
                   contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                 />
               </PieChart>
@@ -65,7 +65,7 @@ export default function OverviewCharts({ summary }: { summary: MonthlySummary })
             <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} width={48}
               tickFormatter={v => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)} />
             <Tooltip
-              formatter={(v: number) => [formatAmount(v), '']}
+              formatter={(value) => [formatAmount(Number(value)), "Belopp"]}
               contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
             />
             <Bar dataKey="Inkomster" fill="#10b981" radius={[4, 4, 0, 0]} />
